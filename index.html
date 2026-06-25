@@ -75,7 +75,12 @@
                             <span id="track-type-badge" class="badge badge-music">MÜZİK</span>
                         </div>
                         <h2 id="now-playing-title" class="marquee">Şarkı Seçilmedi</h2>
-                        <h3 id="now-playing-artist">Radyoyu Başlatın</h3>
+                        <div class="artist-like-container">
+                            <h3 id="now-playing-artist">Radyoyu Başlatın</h3>
+                            <button id="like-btn" class="like-btn" title="Beğen" style="display: none;">
+                                <i data-lucide="heart" id="like-icon"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Progress Bar -->
@@ -119,6 +124,22 @@
                             <button id="live-mode-btn" class="icon-btn" title="Senkronize Canlı Simülasyon">
                                 <i data-lucide="radio-tower"></i>
                                 <span class="btn-label-tooltip">Canlı Sim.</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Playlist Selector Pills -->
+                    <div class="playlist-selector-container">
+                        <span class="playlist-selector-label">ÇALMA LİSTESİ:</span>
+                        <div class="playlist-selector-pills">
+                            <button class="pill-btn active" data-playlist="all">
+                                <i data-lucide="radio"></i> Radyo Akışı
+                            </button>
+                            <button class="pill-btn" data-playlist="favorites">
+                                <i data-lucide="heart"></i> Beğenilenler
+                            </button>
+                            <button class="pill-btn" data-playlist="most-played">
+                                <i data-lucide="award"></i> En Çok Dinlenenler
                             </button>
                         </div>
                     </div>
@@ -234,12 +255,7 @@
 
         <!-- FOOTER -->
         <footer class="app-footer">
-            <p>BLACK FM © 2026. GitHub Pages Uyumlu Statik Radyo.</p>
-            <div class="footer-links">
-                <span>Geliştirici Araçları</span>
-                <span class="divider">|</span>
-                <a href="#" id="test-jingle-btn" class="footer-action-link"><i data-lucide="play-circle"></i> Hemen Jingle Tetikle</a>
-            </div>
+            <p>BLACK FM © 2026. GitHub Pro design By Aka</p>
         </footer>
     </div>
 
