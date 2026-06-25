@@ -132,6 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // -------------------------------------------------------------
     
     let nextSongIndex = null;
+    let nextNumericJingleIndex = 0;
 
     function prepareNextTrack() {
         if (songs.length === 0) return;
@@ -165,25 +166,35 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Check if the very next track will be a jingle
-        let isNextJingle = false;
-        if (jingleFrequency > 0 && jingles.length > 0) {
+        // Check if next track is a jingle in our sequence
+        if (jingles.length > 0) {
+            const numericJingles = jingles.filter(j => /jingles\/[1-8]\.mp3$/.test(j.src));
+            
             if (currentTrack && currentTrack.type === "music") {
-                if (songsPlayedCount >= jingleFrequency) {
-                    isNextJingle = true;
+                // Currently playing music -> next is numeric jingle
+                if (numericJingles.length > 0) {
+                    const nextJingle = numericJingles[nextNumericJingleIndex];
+                    nextTrackTitle.textContent = `${nextJingle.title} (Tanıtım)`;
+                    return;
+                }
+            } else if (currentTrack && currentTrack.type === "jingle") {
+                // Currently playing a jingle
+                const currentSrc = currentTrack.track.src.toLowerCase();
+                const isNumeric = /jingles\/[1-8]\.mp3$/.test(currentSrc);
+                if (isNumeric) {
+                    // Next is the BlackFm jingle
+                    nextTrackTitle.textContent = "BLACK FM (Jingle)";
+                    return;
                 }
             }
         }
 
-        if (isNextJingle) {
-            nextTrackTitle.textContent = "BLACK FM JINGLE (Tanıtım)";
-        } else {
-            if (nextSongIndex === null || nextSongIndex >= songs.length) {
-                nextSongIndex = 0; // Fallback
-            }
-            const nextSong = songs[nextSongIndex];
-            nextTrackTitle.textContent = `${nextSong.title} - ${nextSong.artist}`;
+        // Default song preview
+        if (nextSongIndex === null || nextSongIndex >= songs.length) {
+            nextSongIndex = 0; // Fallback
         }
+        const nextSong = songs[nextSongIndex];
+        nextTrackTitle.textContent = `${nextSong.title} - ${nextSong.artist}`;
     }
 
     // Create playing queue item
@@ -278,21 +289,36 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Play next element in radio queue
-    function playNext() {
+    function playNext(isAuto = false) {
         if (songs.length === 0) return;
 
-        // Check if we should inject a jingle
-        if (jingleFrequency > 0 && jingles.length > 0) {
-            if (songsPlayedCount >= jingleFrequency) {
-                // Play random jingle!
-                songsPlayedCount = 0;
-                const randomJingle = jingles[Math.floor(Math.random() * jingles.length)];
-                transitionToTrack(randomJingle, "jingle");
-                return;
+        // Play custom sequential jingle if isAuto is true
+        if (isAuto === true && jingles.length > 0) {
+            // Find numeric jingles: 1.mp3 to 8.mp3
+            const numericJingles = jingles.filter(j => /jingles\/[1-8]\.mp3$/.test(j.src));
+            const blackFmJingle = jingles.find(j => j.src.toLowerCase().endsWith("jingles/blackfm.mp3"));
+
+            if (currentTrack && currentTrack.type === "music") {
+                // Song ended naturally -> play the next numeric jingle in sequence
+                if (numericJingles.length > 0) {
+                    const jingleToPlay = numericJingles[nextNumericJingleIndex];
+                    nextNumericJingleIndex = (nextNumericJingleIndex + 1) % numericJingles.length;
+                    transitionToTrack(jingleToPlay, "jingle");
+                    return;
+                }
+            } else if (currentTrack && currentTrack.type === "jingle") {
+                // Jingle ended -> check if it was numeric or blackfm
+                const currentSrc = currentTrack.track.src.toLowerCase();
+                const isNumeric = /jingles\/[1-8]\.mp3$/.test(currentSrc);
+                if (isNumeric && blackFmJingle) {
+                    // Numeric jingle ended -> play BlackFm jingle immediately
+                    transitionToTrack(blackFmJingle, "jingle");
+                    return;
+                }
             }
         }
 
-        // Play next song (use pre-calculated index)
+        // If not auto, or jingle flow didn't trigger, play the next song in the playlist
         if (nextSongIndex === null || nextSongIndex >= songs.length) {
             if (isShuffle) {
                 nextSongIndex = Math.floor(Math.random() * songs.length);
@@ -302,7 +328,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const songToPlay = songs[nextSongIndex];
-        songsPlayedCount++;
+        songsPlayedCount = 0;
 
         // Record song to history
         if (currentTrack && currentTrack.type === "music") {
@@ -655,7 +681,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (isPlaying && (audio.duration - audio.currentTime <= crossfadeDuration) && crossfadeDuration > 0) {
             // Unbind timeupdate temporarily to prevent double skip
             audio.ontimeupdate = null;
-            playNext();
+            playNext(true);
         }
     });
 
@@ -666,7 +692,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     audio.addEventListener("ended", () => {
-        playNext();
+        playNext(true);
     });
 
     audio.addEventListener("waiting", () => {
