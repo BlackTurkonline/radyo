@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // Playback Queue variables
     let history = [];
-    let isShuffle = false;
+    let isShuffle = true;
     let isLiveMode = false;
     let jingleFrequency = 2; // Every 2 songs, play a jingle
     let songsPlayedCount = 0; // Songs played since last jingle
@@ -224,9 +224,9 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             // If we just finished a jingle, resume with a song
             if (currentTrack && currentTrack.type === "jingle") {
-                // Keep the current song index or go to next
-                // Let's go to next song
-                if (history.length > 0) {
+                if (isShuffle) {
+                    nextIndex = Math.floor(Math.random() * songs.length);
+                } else if (history.length > 0) {
                     const lastSongSrc = history[history.length - 1];
                     const lastIndex = songs.findIndex(s => s.src === lastSongSrc);
                     nextIndex = (lastIndex + 1) % songs.length;
@@ -234,7 +234,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     nextIndex = 0;
                 }
             } else {
-                nextIndex = 0;
+                nextIndex = isShuffle ? Math.floor(Math.random() * songs.length) : 0;
             }
             songsPlayedCount++;
         }
@@ -1047,8 +1047,15 @@ document.addEventListener("DOMContentLoaded", () => {
     renderSongsList();
     renderJinglesList();
 
+    // Set initial shuffle button state
+    if (isShuffle && shuffleBtn) {
+        shuffleBtn.classList.add("active");
+    }
+
     // Default select first track without auto-playing immediately (user interaction first)
     if (songs.length > 0) {
-        setTrack(songs[0], "music");
+        // If shuffle is active, select a random starting track
+        const startTrack = isShuffle ? songs[Math.floor(Math.random() * songs.length)] : songs[0];
+        setTrack(startTrack, "music");
     }
 });
