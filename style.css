@@ -1685,3 +1685,75 @@ body.is-guest .control-panel {
     gap: 3px;
 }
 
+/* Visualizer Bars Container */
+.visualizer-bars-container {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 4px;
+    height: 40px;
+    width: 100%;
+    max-width: 260px;
+    margin: 5px auto 20px auto;
+    z-index: 2;
+    padding-bottom: 2px;
+}
+
+.visualizer-bars-container .bar {
+    width: 4px;
+    height: 4px;
+    background: linear-gradient(to top, var(--neon-green), var(--neon-blue));
+    border-radius: 2px;
+    transition: height 0.1s ease;
+    box-shadow: 0 0 5px rgba(0, 255, 204, 0.4);
+}
+
+/* Coloring variations across the visualizer spectrum */
+.visualizer-bars-container .bar:nth-child(3n) {
+    background: linear-gradient(to top, var(--neon-blue), var(--neon-purple));
+    box-shadow: 0 0 5px rgba(0, 217, 255, 0.4);
+}
+
+.visualizer-bars-container .bar:nth-child(3n+1) {
+    background: linear-gradient(to top, var(--neon-pink), var(--neon-purple));
+    box-shadow: 0 0 5px rgba(255, 0, 127, 0.4);
+}
+
+/* Pure CSS Simulated Animation fallback when not playing/paused */
+.visualizer-bars-container.simulated .bar {
+    animation: simulated-pulse 0.8s infinite ease-in-out alternate;
+}
+
+/* Pause simulated animation when audio is paused */
+.visualizer-bars-container.paused .bar {
+    animation-play-state: paused !important;
+    height: 4px !important;
+}
+
+@keyframes simulated-pulse {
+    0% {
+        height: 6px;
+    }
+    100% {
+        height: 32px;
+    }
+}
+
+/* Animation delays to create wave effect for fallback */
+.visualizer-bars-container.simulated .bar:nth-child(1) { animation-delay: 0.1s; }
+.visualizer-bars-container.simulated .bar:nth-child(2) { animation-delay: 0.4s; }
+.visualizer-bars-container.simulated .bar:nth-child(3) { animation-delay: 0.2s; }
+.visualizer-bars-container.simulated .bar:nth-child(4) { animation-delay: 0.6s; }
+.visualizer-bars-container.simulated .bar:nth-child(5) { animation-delay: 0.3s; }
+.visualizer-bars-container.simulated .bar:nth-child(6) { animation-delay: 0.7s; }
+.visualizer-bars-container.simulated .bar:nth-child(7) { animation-delay: 0.15s; }
+.visualizer-bars-container.simulated .bar:nth-child(8) { animation-delay: 0.5s; }
+.visualizer-bars-container.simulated .bar:nth-child(9) { animation-delay: 0.25s; }
+.visualizer-bars-container.simulated .bar:nth-child(10) { animation-delay: 0.8s; }
+.visualizer-bars-container.simulated .bar:nth-child(11) { animation-delay: 0.35s; }
+.visualizer-bars-container.simulated .bar:nth-child(12) { animation-delay: 0.65s; }
+.visualizer-bars-container.simulated .bar:nth-child(13) { animation-delay: 0.45s; }
+.visualizer-bars-container.simulated .bar:nth-child(14) { animation-delay: 0.9s; }
+.visualizer-bars-container.simulated .bar:nth-child(15) { animation-delay: 0.55s; }
+.visualizer-bars-container.simulated .bar:nth-child(16) { animation-delay: 0.75s; }
+
