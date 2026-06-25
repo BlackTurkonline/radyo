@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BLACK FM - Kişisel Çalma Listeli Radyo Simülatörü</title>
+    <meta name="description" content="BLACK FM: Kendi şarkılarınızı yükleyin, otomatik jingle geçişleri ve neon ses görselleştirici ile kendi radyo istasyonunuzu oluşturun.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- HLS.js for HLS (.m3u8) streaming fallback support -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Neon Background Orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="brand">
+                <div class="brand-logo">
+                    <i data-lucide="radio" class="glow-icon-green"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>BLACK <span class="accent-text">FM</span></h1>
+                    <p class="subtitle">RETRO-CYBERPUNK RADIO</p>
+                </div>
+            </div>
+            <div class="status-indicator">
+                <span class="pulse-dot"></span>
+                <span id="stream-status">YAYIN HAZIR</span>
+            </div>
+        </header>
+
+        <!-- MAIN GRID -->
+        <main class="app-grid">
+            <!-- LEFT: PLAYER PANEL -->
+            <section class="panel player-panel glassmorphism">
+                <div class="deck-container">
+                    <!-- Audio Canvas Visualizer -->
+                    <canvas id="visualizer" class="visualizer-canvas"></canvas>
+
+                    <!-- Neon Cassette / Glowing Vinyl Disk -->
+                    <div class="vinyl-wrapper">
+                        <div class="vinyl" id="vinyl-disk">
+                            <div class="vinyl-center"></div>
+                            <div class="vinyl-lines"></div>
+                            <div class="vinyl-label">
+                                <span class="label-brand">BLACK FM</span>
+                                <span class="label-freq">99.9 MHz</span>
+                            </div>
+                        </div>
+                        <div class="play-state-overlay">
+                            <i data-lucide="play" id="overlay-play-icon"></i>
+                        </div>
+                    </div>
+
+                    <!-- Now Playing Info -->
+                    <div class="track-info">
+                        <div class="badge-container">
+                            <span id="track-type-badge" class="badge badge-music">MÜZİK</span>
+                        </div>
+                        <h2 id="now-playing-title" class="marquee">Şarkı Seçilmedi</h2>
+                        <h3 id="now-playing-artist">Radyoyu Başlatın</h3>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="progress-container">
+                        <span id="current-time">00:00</span>
+                        <div class="progress-bar-wrapper" id="progress-bar-wrapper">
+                            <div class="progress-bar" id="progress-bar"></div>
+                            <div class="progress-handle" id="progress-handle"></div>
+                        </div>
+                        <span id="total-time">00:00</span>
+                    </div>
+
+                    <!-- Player Controls -->
+                    <div class="player-controls">
+                        <button id="prev-btn" class="ctrl-btn" title="Önceki">
+                            <i data-lucide="skip-back"></i>
+                        </button>
+                        <button id="play-btn" class="ctrl-btn play-btn" title="Oynat / Duraklat">
+                            <i data-lucide="play" id="play-icon"></i>
+                        </button>
+                        <button id="next-btn" class="ctrl-btn" title="Sonraki">
+                            <i data-lucide="skip-forward"></i>
+                        </button>
+                    </div>
+
+                    <!-- Volume Control & Extras -->
+                    <div class="extra-controls">
+                        <div class="volume-container">
+                            <button id="mute-btn" class="icon-btn" title="Sessiz">
+                                <i data-lucide="volume-2" id="volume-icon"></i>
+                            </button>
+                            <div class="volume-slider-wrapper" id="volume-slider-wrapper">
+                                <div class="volume-bar" id="volume-bar" style="width: 80%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="toggle-buttons">
+                            <button id="shuffle-btn" class="icon-btn" title="Karıştır">
+                                <i data-lucide="shuffle"></i>
+                            </button>
+                            <button id="live-mode-btn" class="icon-btn" title="Senkronize Canlı Simülasyon">
+                                <i data-lucide="radio-tower"></i>
+                                <span class="btn-label-tooltip">Canlı Sim.</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RIGHT: PLAYLIST & CONFIGURATION PANEL -->
+            <section class="panel control-panel glassmorphism">
+                <!-- Navigation Tabs -->
+                <nav class="panel-tabs">
+                    <button class="tab-btn active" data-tab="tab-songs">ŞARKILAR</button>
+                    <button class="tab-btn" data-tab="tab-jingles">JINGLE'LAR</button>
+                    <button class="tab-btn" data-tab="tab-settings">AYARLAR</button>
+                </nav>
+
+                <!-- TAB CONTENT: SONGS -->
+                <div class="tab-content active" id="tab-songs">
+                    <div class="section-header">
+                        <h3>Müzik Listesi</h3>
+                        <span id="songs-count" class="count-badge">0 Şarkı</span>
+                    </div>
+
+                    <!-- Drag & Drop Upload Zone for Songs -->
+                    <div class="upload-zone" id="song-upload-zone">
+                        <i data-lucide="upload-cloud" class="upload-icon"></i>
+                        <p>Kendi MP3 Şarkılarınızı Sürükleyin veya <span>Dosya Seçin</span></p>
+                        <input type="file" id="song-file-input" multiple accept="audio/mp3,audio/mpeg,audio/wav,audio/aac,audio/ogg" style="display: none;">
+                    </div>
+
+                    <!-- Dynamic Songs List -->
+                    <div class="scrollable-list" id="songs-list-container">
+                        <!-- Will be populated dynamically by JS -->
+                    </div>
+                </div>
+
+                <!-- TAB CONTENT: JINGLES -->
+                <div class="tab-content" id="tab-jingles">
+                    <div class="section-header">
+                        <h3>Jingle Listesi</h3>
+                        <span id="jingles-count" class="count-badge">0 Jingle</span>
+                    </div>
+
+                    <!-- Drag & Drop Upload Zone for Jingles -->
+                    <div class="upload-zone" id="jingle-upload-zone">
+                        <i data-lucide="sparkles" class="upload-icon"></i>
+                        <p>Kendi Jingle MP3'lerinizi Sürükleyin veya <span>Dosya Seçin</span></p>
+                        <input type="file" id="jingle-file-input" multiple accept="audio/mp3,audio/mpeg,audio/wav,audio/aac,audio/ogg" style="display: none;">
+                    </div>
+
+                    <!-- Dynamic Jingles List -->
+                    <div class="scrollable-list" id="jingles-list-container">
+                        <!-- Will be populated dynamically by JS -->
+                    </div>
+                </div>
+
+                <!-- TAB CONTENT: SETTINGS -->
+                <div class="tab-content" id="tab-settings">
+                    <h3>Radyo Ayarları</h3>
+                    
+                    <div class="settings-form">
+                        <!-- Jingle Frequency -->
+                        <div class="setting-group">
+                            <label for="jingle-frequency">Jingle Sıklığı</label>
+                            <select id="jingle-frequency">
+                                <option value="1">Her şarkıda bir jingle çal</option>
+                                <option value="2" selected>Her 2 şarkıda bir jingle çal</option>
+                                <option value="3">Her 3 şarkıda bir jingle çal</option>
+                                <option value="4">Her 4 şarkıda bir jingle çal</option>
+                                <option value="0">Jingle'ları tamamen kapat</option>
+                            </select>
+                            <p class="setting-desc">Jingle'lar çalma listesindeki şarkıların arasına otomatik olarak eklenir.</p>
+                        </div>
+
+                        <!-- Simulated Crossfade -->
+                        <div class="setting-group">
+                            <label for="crossfade-duration">Yumuşak Geçiş (Saniye)</label>
+                            <div class="range-input-container">
+                                <input type="range" id="crossfade-duration" min="0" max="5" value="2" step="0.5">
+                                <span id="crossfade-value">2s</span>
+                            </div>
+                            <p class="setting-desc">Şarkıların geçişlerinde yumuşak ses kısma/açma süresi.</p>
+                        </div>
+
+                        <!-- Custom URL Stream Input -->
+                        <div class="setting-group">
+                            <label for="custom-stream-url">Dışarıdan Akış/MP3 URL Ekle</label>
+                            <div class="input-row">
+                                <input type="text" id="custom-stream-url" placeholder="https://example.com/stream.mp3 veya .m3u8">
+                                <button id="add-url-btn" class="action-btn">Ekle</button>
+                            </div>
+                            <p class="setting-desc">İnternetteki herhangi bir canlı akış veya MP3 bağlantısını listenize katın.</p>
+                        </div>
+
+                        <!-- Reset to Default Playlist -->
+                        <div class="setting-group reset-group">
+                            <button id="reset-playlist-btn" class="danger-btn">
+                                <i data-lucide="refresh-cw"></i> Varsayılan Listeye Sıfırla
+                            </button>
+                            <p class="setting-desc">Eklediğiniz tüm şarkı ve jingle'ları temizleyip başlangıç çalma listesine döner.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="app-footer">
+            <p>BLACK FM © 2026. GitHub Pages Uyumlu Statik Radyo.</p>
+            <div class="footer-links">
+                <span>Geliştirici Araçları</span>
+                <span class="divider">|</span>
+                <a href="#" id="test-jingle-btn" class="footer-action-link"><i data-lucide="play-circle"></i> Hemen Jingle Tetikle</a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Background Audio element -->
+    <audio id="audio-player" crossorigin="anonymous"></audio>
+
+    <!-- Load scripts -->
+    <script src="playlist.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
