@@ -108,6 +108,11 @@ body {
     display: flex;
     flex-direction: column;
     z-index: 1;
+    transition: max-width 0.4s ease;
+}
+
+body.is-dj .app-container {
+    max-width: 1100px;
 }
 
 /* Header */
@@ -218,6 +223,15 @@ body {
     display: flex;
     flex-direction: column;
     gap: 20px;
+}
+
+body.is-dj .app-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1.2fr;
+}
+
+body.is-guest .control-panel {
+    display: none !important;
 }
 
 .panel {
