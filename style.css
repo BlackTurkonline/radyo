@@ -1310,9 +1310,19 @@ body.is-guest .control-panel {
 
 /* Responsive Layout */
 @media (max-width: 768px) {
+    body {
+        display: block !important;
+        overflow-x: hidden;
+        width: 100%;
+        height: auto;
+    }
+
     .app-container {
-        margin: 10px;
+        margin: 0;
+        padding: 12px;
+        width: 100%;
         max-width: 100% !important;
+        overflow-x: hidden;
     }
 
     .app-grid {
