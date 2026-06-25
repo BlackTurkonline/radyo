@@ -1102,7 +1102,7 @@ body.is-guest .control-panel {
 /* Footer */
 .app-footer {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     padding: 15px 20px;
     margin-top: 20px;
@@ -1535,5 +1535,153 @@ body.is-guest .control-panel {
     .footer-links .divider {
         display: inline;
     }
+}
+
+/* Artist and Like Button alignment */
+.artist-like-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 5px;
+}
+
+.like-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-glass);
+    flex-shrink: 0;
+}
+
+.like-btn:hover {
+    color: var(--neon-pink);
+    background: rgba(255, 0, 127, 0.08);
+    border-color: rgba(255, 0, 127, 0.2);
+    box-shadow: 0 0 10px rgba(255, 0, 127, 0.3);
+    transform: scale(1.1);
+}
+
+.like-btn.liked {
+    color: var(--neon-pink);
+    background: rgba(255, 0, 127, 0.12);
+    border-color: var(--neon-pink);
+    box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
+}
+
+.like-btn.liked i {
+    fill: var(--neon-pink);
+}
+
+.like-btn i {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.2s ease;
+}
+
+.like-btn:active i {
+    transform: scale(0.8);
+}
+
+/* Playlist Selector Pills */
+.playlist-selector-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-width: 380px;
+    margin-top: 20px;
+    z-index: 2;
+}
+
+.playlist-selector-label {
+    font-size: 0.65rem;
+    font-weight: bold;
+    color: var(--text-dimmed);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    text-align: left;
+}
+
+.playlist-selector-pills {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+}
+
+.pill-btn {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-glass);
+    color: var(--text-muted);
+    padding: 8px 6px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.pill-btn i {
+    width: 12px;
+    height: 12px;
+}
+
+.pill-btn:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.pill-btn.active {
+    color: var(--neon-green);
+    background: rgba(0, 255, 204, 0.08);
+    border-color: var(--neon-green);
+    box-shadow: 0 0 8px rgba(0, 255, 204, 0.2);
+}
+
+/* Special highlight for favorites active */
+.pill-btn[data-playlist="favorites"].active {
+    color: var(--neon-pink);
+    background: rgba(255, 0, 127, 0.08);
+    border-color: var(--neon-pink);
+    box-shadow: 0 0 8px rgba(255, 0, 127, 0.2);
+}
+
+/* Special highlight for most played active */
+.pill-btn[data-playlist="most-played"].active {
+    color: var(--neon-blue);
+    background: rgba(0, 217, 255, 0.08);
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 8px rgba(0, 217, 255, 0.2);
+}
+
+/* Extra stats indicators in track list */
+.card-heart-icon {
+    display: inline-flex;
+    align-items: center;
+}
+
+.card-play-count {
+    font-size: 0.65rem;
+    color: var(--text-dimmed);
+    margin-left: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
 }
 
