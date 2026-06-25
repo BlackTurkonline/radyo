@@ -103,7 +103,7 @@ body {
 /* App Wrapper */
 .app-container {
     width: 100%;
-    max-width: 1100px;
+    max-width: 1300px;
     margin: 20px;
     display: flex;
     flex-direction: column;
@@ -216,9 +216,33 @@ body {
 /* Grid Layout */
 .app-grid {
     display: grid;
-    grid-template-columns: 1.1fr 1.2fr;
+    grid-template-columns: 1fr 1.1fr 1.2fr;
     gap: 20px;
     min-height: 580px;
+}
+
+/* LEFT: CHAT PANEL */
+.chat-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-frame-container {
+    flex-grow: 1;
+    width: 100%;
+    height: 100%;
+    min-height: 440px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border-glass);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.chat-frame-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
 }
 
 .panel {
@@ -1267,14 +1291,14 @@ body.is-guest .footer-links {
     display: none !important;
 }
 
-/* Hide Control Panel completely in Guest Mode and center Player */
+/* Hide Control Panel completely in Guest Mode and adjust to 2 columns */
 body.is-guest .control-panel {
     display: none !important;
 }
 
 body.is-guest .app-grid {
-    grid-template-columns: 1fr;
-    max-width: 500px;
+    grid-template-columns: 1fr 1.1fr;
+    max-width: 960px;
     margin: 0 auto;
     width: 100%;
 }
@@ -1301,6 +1325,20 @@ body.is-guest .scrollable-list {
     .app-grid {
         grid-template-columns: 1fr !important;
         gap: 16px;
+    }
+    
+    /* Order items on mobile so Player is first, then Chat, then DJ Panel */
+    .player-panel {
+        order: 1;
+    }
+    
+    .chat-panel {
+        order: 2;
+        min-height: 450px;
+    }
+    
+    .control-panel {
+        order: 3;
     }
     
     .panel {
