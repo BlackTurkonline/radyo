@@ -17,6 +17,26 @@ const DEFAULT_PLAYLIST = {
   // Şarkı aralarına girecek Jingle'lar
   jingles: [
     {
+      title: "Black FM Jingle 2",
+      artist: "BLACK FM",
+      src: "jingles/J2.mp3"
+    },
+    {
+      title: "Black FM Jingle 3",
+      artist: "BLACK FM",
+      src: "jingles/J3.mp3"
+    },
+    {
+      title: "Black FM Jingle 4",
+      artist: "BLACK FM",
+      src: "jingles/J4.mp3"
+    },
+    {
+      title: "Black FM Jingle 5",
+      artist: "BLACK FM",
+      src: "jingles/J5.mp3"
+    },
+    {
       title: "Black FM Retro Dial-Up ID",
       artist: "System Sound",
       src: "https://www.soundjay.com/communication/sounds/dial-up-modem-01.mp3"
