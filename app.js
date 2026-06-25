@@ -1366,6 +1366,85 @@ document.addEventListener("DOMContentLoaded", () => {
         setTrack(startTrack, "music");
     }
 
+    // Fetch songs dynamically from Archive.org item metadata in the background
+    async function syncSongsFromArchive() {
+        try {
+            console.log("Syncing songs from Archive.org metadata...");
+            const response = await fetch("https://archive.org/metadata/Blackfm");
+            if (!response.ok) throw new Error("Metadata request failed");
+            
+            const data = await response.json();
+            if (!data.files || data.files.length === 0) return;
+            
+            const mp3Files = data.files.filter(f => f.name.toLowerCase().endsWith(".mp3"));
+            if (mp3Files.length === 0) return;
+            
+            // Map files to song objects
+            const fetchedSongs = mp3Files.map(file => {
+                const parts = file.name.split("/");
+                const baseNameWithExt = parts[parts.length - 1];
+                const baseName = baseNameWithExt.substring(0, baseNameWithExt.lastIndexOf("."));
+                
+                let title = file.title || "";
+                let artist = file.creator || file.artist || "";
+                
+                if (!title || !artist) {
+                    if (baseName.includes(" - ")) {
+                        const splitParts = baseName.split(" - ");
+                        artist = artist || splitParts[0].trim();
+                        title = title || splitParts.slice(1).join(" - ").trim();
+                    } else {
+                        title = title || baseName.trim();
+                        artist = artist || "BLACK FM";
+                    }
+                }
+                
+                let duration = "CANLI";
+                if (file.length) {
+                    const secs = parseFloat(file.length);
+                    const m = Math.floor(secs / 60);
+                    const s = Math.floor(secs % 60).toString().padStart(2, '0');
+                    duration = `${m}:${s}`;
+                }
+                
+                const src = encodeURI(`https://archive.org/download/Blackfm/${file.name}`);
+                
+                return {
+                    title,
+                    artist,
+                    src,
+                    duration
+                };
+            });
+            
+            console.log(`Successfully parsed ${fetchedSongs.length} songs from Archive.org!`);
+            
+            // Update state
+            DEFAULT_PLAYLIST.songs = fetchedSongs;
+            allSongs = [...DEFAULT_PLAYLIST.songs, ...customTracks];
+            
+            // If the user hasn't started playing anything, reset the starting track to the new list
+            const currentSrc = currentTrack && currentTrack.track && currentTrack.track.src;
+            const isPlayingOrLoaded = currentSrc && fetchedSongs.some(s => s.src === currentSrc);
+            
+            updateSongsQueue();
+            renderSongsList();
+            
+            if (!isPlaying && !isPlayingOrLoaded && songs.length > 0) {
+                const startTrack = isShuffle ? songs[Math.floor(Math.random() * songs.length)] : songs[0];
+                setTrack(startTrack, "music");
+            } else {
+                prepareNextTrack();
+            }
+            
+        } catch (error) {
+            console.error("Failed to sync songs from Archive.org, using local fallback list.", error);
+        }
+    }
+
+    // Start background sync
+    syncSongsFromArchive();
+
     // -------------------------------------------------------------
     // 11. SONG SEARCH IMPLEMENTATION
     // -------------------------------------------------------------
