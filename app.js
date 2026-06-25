@@ -99,7 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // Canvas
     const canvas = document.getElementById("visualizer");
-    const canvasCtx = canvas.getContext("2d");
+    const canvasCtx = canvas ? canvas.getContext("2d") : null;
 
     // Initialize Lucide Icons
     lucide.createIcons();
@@ -586,8 +586,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderSongsList() {
+        if (!songsList) return;
         songsList.innerHTML = "";
-        songsCountBadge.textContent = `${songs.length} Şarkı`;
+        if (songsCountBadge) songsCountBadge.textContent = `${songs.length} Şarkı`;
         
         if (songs.length === 0) {
             songsList.innerHTML = `<div class="empty-list-msg">Çalma listesi boş. Şarkı ekleyin!</div>`;
@@ -635,8 +636,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderJinglesList() {
+        if (!jinglesList) return;
         jinglesList.innerHTML = "";
-        jinglesCountBadge.textContent = `${jingles.length} Jingle`;
+        if (jinglesCountBadge) jinglesCountBadge.textContent = `${jingles.length} Jingle`;
 
         if (jingles.length === 0) {
             jinglesList.innerHTML = `<div class="empty-list-msg">Jingle listesi boş. Jingle ekleyin!</div>`;
@@ -737,25 +739,30 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Songs file selection
-    songUploadZone.addEventListener("click", () => songFileInput.click());
-    songFileInput.addEventListener("change", (e) => {
-        processAudioFiles(e.target.files, (newSong) => {
-            songs.push(newSong);
-            renderSongsList();
+    if (songUploadZone && songFileInput) {
+        songUploadZone.addEventListener("click", () => songFileInput.click());
+        songFileInput.addEventListener("change", (e) => {
+            processAudioFiles(e.target.files, (newSong) => {
+                songs.push(newSong);
+                renderSongsList();
+            });
         });
-    });
+    }
 
     // Jingles file selection
-    jingleUploadZone.addEventListener("click", () => jingleFileInput.click());
-    jingleFileInput.addEventListener("change", (e) => {
-        processAudioFiles(e.target.files, (newJingle) => {
-            jingles.push(newJingle);
-            renderJinglesList();
+    if (jingleUploadZone && jingleFileInput) {
+        jingleUploadZone.addEventListener("click", () => jingleFileInput.click());
+        jingleFileInput.addEventListener("change", (e) => {
+            processAudioFiles(e.target.files, (newJingle) => {
+                jingles.push(newJingle);
+                renderJinglesList();
+            });
         });
-    });
+    }
 
     // Drag and Drop implementation
     function setupDragAndDrop(zone, fileInput, listCallback) {
+        if (!zone || !fileInput) return;
         zone.addEventListener("dragover", (e) => {
             e.preventDefault();
             zone.classList.add("dragover");
@@ -775,15 +782,19 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    setupDragAndDrop(songUploadZone, songFileInput, (newSong) => {
-        songs.push(newSong);
-        renderSongsList();
-    });
+    if (songUploadZone && songFileInput) {
+        setupDragAndDrop(songUploadZone, songFileInput, (newSong) => {
+            songs.push(newSong);
+            renderSongsList();
+        });
+    }
 
-    setupDragAndDrop(jingleUploadZone, jingleFileInput, (newJingle) => {
-        jingles.push(newJingle);
-        renderJinglesList();
-    });
+    if (jingleUploadZone && jingleFileInput) {
+        setupDragAndDrop(jingleUploadZone, jingleFileInput, (newJingle) => {
+            jingles.push(newJingle);
+            renderJinglesList();
+        });
+    }
 
     // Deleting tracks
     function deleteSong(index) {
@@ -820,94 +831,105 @@ document.addEventListener("DOMContentLoaded", () => {
     // -------------------------------------------------------------
     
     // Jingle frequency setting change
-    jingleFreqSelect.addEventListener("change", (e) => {
-        jingleFrequency = parseInt(e.target.value);
-        songsPlayedCount = 0; // reset counter
-    });
+    if (jingleFreqSelect) {
+        jingleFreqSelect.addEventListener("change", (e) => {
+            jingleFrequency = parseInt(e.target.value);
+            songsPlayedCount = 0; // reset counter
+        });
+    }
 
     // Crossfade setting change
-    crossfadeSlider.addEventListener("input", (e) => {
-        crossfadeDuration = parseFloat(e.target.value);
-        crossfadeValue.textContent = `${crossfadeDuration}s`;
-    });
+    if (crossfadeSlider) {
+        crossfadeSlider.addEventListener("input", (e) => {
+            crossfadeDuration = parseFloat(e.target.value);
+            if (crossfadeValue) crossfadeValue.textContent = `${crossfadeDuration}s`;
+        });
+    }
 
     // Adding custom stream URL
-    addUrlBtn.addEventListener("click", () => {
-        const url = customStreamUrl.value.trim();
-        if (!url) return;
+    if (addUrlBtn && customStreamUrl) {
+        addUrlBtn.addEventListener("click", () => {
+            const url = customStreamUrl.value.trim();
+            if (!url) return;
 
-        // Try to guess a name
-        let title = "Özel Yayın";
-        try {
-            const urlObj = new URL(url);
-            const pathParts = urlObj.pathname.split("/");
-            const lastPart = pathParts[pathParts.length - 1];
-            if (lastPart) title = decodeURIComponent(lastPart.replace(/\.[^/.]+$/, ""));
-        } catch(e) {}
+            // Try to guess a name
+            let title = "Özel Yayın";
+            try {
+                const urlObj = new URL(url);
+                const pathParts = urlObj.pathname.split("/");
+                const lastPart = pathParts[pathParts.length - 1];
+                if (lastPart) title = decodeURIComponent(lastPart.replace(/\.[^/.]+$/, ""));
+            } catch(e) {}
 
-        const newTrack = {
-            title: title,
-            artist: "Canlı Yayın Akışı",
-            src: url,
-            duration: "CANLI"
-        };
+            const newTrack = {
+                title: title,
+                artist: "Canlı Yayın Akışı",
+                src: url,
+                duration: "CANLI"
+            };
 
-        songs.push(newTrack);
-        customTracks.push(newTrack);
-        
-        // Save URL list persistently
-        localStorage.setItem("blackfm_custom_tracks", JSON.stringify(customTracks));
+            songs.push(newTrack);
+            customTracks.push(newTrack);
+            
+            // Save URL list persistently
+            localStorage.setItem("blackfm_custom_tracks", JSON.stringify(customTracks));
 
-        // Render lists & notify
-        renderSongsList();
-        customStreamUrl.value = "";
-        
-        // Scroll to tab and highlight
-        document.querySelector("[data-tab='tab-songs']").click();
-    });
+            // Render lists & notify
+            renderSongsList();
+            customStreamUrl.value = "";
+            
+            // Scroll to tab and highlight
+            const tabSongs = document.querySelector("[data-tab='tab-songs']");
+            if (tabSongs) tabSongs.click();
+        });
+    }
 
     // Reset playlist
-    resetPlaylistBtn.addEventListener("click", () => {
-        if (confirm("Çalma listesini varsayılan şarkılara sıfırlamak istiyor musunuz? Eklediğiniz tüm şarkı ve URL'ler temizlenecektir.")) {
-            // Revoke blob URLs to free memory
-            songs.forEach(s => {
-                if (s.isLocal && s.src.startsWith("blob:")) {
-                    URL.revokeObjectURL(s.src);
-                }
-            });
-            jingles.forEach(j => {
-                if (j.isLocal && j.src.startsWith("blob:")) {
-                    URL.revokeObjectURL(j.src);
-                }
-            });
+    if (resetPlaylistBtn) {
+        resetPlaylistBtn.addEventListener("click", () => {
+            if (confirm("Çalma listesini varsayılan şarkılara sıfırlamak istiyor musunuz? Eklediğiniz tüm şarkı ve URL'ler temizlenecektir.")) {
+                // Revoke blob URLs to free memory
+                songs.forEach(s => {
+                    if (s.isLocal && s.src.startsWith("blob:")) {
+                        URL.revokeObjectURL(s.src);
+                    }
+                });
+                jingles.forEach(j => {
+                    if (j.isLocal && j.src.startsWith("blob:")) {
+                        URL.revokeObjectURL(j.src);
+                    }
+                });
 
-            localStorage.removeItem("blackfm_custom_tracks");
-            customTracks = [];
-            
-            songs = [...DEFAULT_PLAYLIST.songs];
-            jingles = [...DEFAULT_PLAYLIST.jingles];
-            
-            songsPlayedCount = 0;
-            currentTrack = null;
-            pauseAudio();
-            
-            renderSongsList();
-            renderJinglesList();
-        }
-    });
+                localStorage.removeItem("blackfm_custom_tracks");
+                customTracks = [];
+                
+                songs = [...DEFAULT_PLAYLIST.songs];
+                jingles = [...DEFAULT_PLAYLIST.jingles];
+                
+                songsPlayedCount = 0;
+                currentTrack = null;
+                pauseAudio();
+                
+                renderSongsList();
+                renderJinglesList();
+            }
+        });
+    }
 
     // Test Jingle trigger in footer
-    testJingleBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        if (jingles.length === 0) {
-            alert("Listede hiç jingle yok! Önce jingle sekmesinden ses yükleyin.");
-            return;
-        }
-        
-        // Trigger a random jingle immediately!
-        const randomJingle = jingles[Math.floor(Math.random() * jingles.length)];
-        transitionToTrack(randomJingle, "jingle");
-    });
+    if (testJingleBtn) {
+        testJingleBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (jingles.length === 0) {
+                alert("Listede hiç jingle yok! Önce jingle sekmesinden ses yükleyin.");
+                return;
+            }
+            
+            // Trigger a random jingle immediately!
+            const randomJingle = jingles[Math.floor(Math.random() * jingles.length)];
+            transitionToTrack(randomJingle, "jingle");
+        });
+    }
 
     // -------------------------------------------------------------
     // 9.5 DJ AUTHENTICATION & UI CONTROL
@@ -928,79 +950,93 @@ document.addEventListener("DOMContentLoaded", () => {
         if (active) {
             document.body.classList.remove("is-guest");
             document.body.classList.add("is-dj");
-            djLoginToggleBtn.classList.add("dj-active");
-            djLoginToggleBtn.innerHTML = '<i data-lucide="unlock"></i> <span id="dj-btn-text">DJ Çıkışı</span>';
-            djLoginToggleBtn.title = "DJ Yetkilerini Kapat";
+            if (djLoginToggleBtn) {
+                djLoginToggleBtn.classList.add("dj-active");
+                djLoginToggleBtn.innerHTML = '<i data-lucide="unlock"></i> <span id="dj-btn-text">DJ Çıkışı</span>';
+                djLoginToggleBtn.title = "DJ Yetkilerini Kapat";
+            }
             sessionStorage.setItem("blackfm_is_dj", "true");
         } else {
             document.body.classList.remove("is-dj");
             document.body.classList.add("is-guest");
-            djLoginToggleBtn.classList.remove("dj-active");
-            djLoginToggleBtn.innerHTML = '<i data-lucide="lock"></i> <span id="dj-btn-text">DJ Girişi</span>';
-            djLoginToggleBtn.title = "DJ Kontrol Paneli Girişi";
+            if (djLoginToggleBtn) {
+                djLoginToggleBtn.classList.remove("dj-active");
+                djLoginToggleBtn.innerHTML = '<i data-lucide="lock"></i> <span id="dj-btn-text">DJ Girişi</span>';
+                djLoginToggleBtn.title = "DJ Kontrol Paneli Girişi";
+            }
             sessionStorage.removeItem("blackfm_is_dj");
             
             // Switch to Songs tab in case they were on Settings or Jingles (which are hidden for guests)
-            document.querySelector("[data-tab='tab-songs']").click();
+            const tabSongs = document.querySelector("[data-tab='tab-songs']");
+            if (tabSongs) tabSongs.click();
         }
         lucide.createIcons();
     }
 
     // Login logic
     async function handleLogin() {
+        if (!djPasswordInput) return;
         const password = djPasswordInput.value;
         const hash = await hashSHA256(password);
         
         if (hash === DJ_PASSWORD_HASH) {
             setDJMode(true);
             closeLoginModal();
-            loginErrorMsg.style.display = "none";
+            if (loginErrorMsg) loginErrorMsg.style.display = "none";
             djPasswordInput.value = "";
         } else {
-            loginErrorMsg.style.display = "block";
+            if (loginErrorMsg) loginErrorMsg.style.display = "block";
             djPasswordInput.value = "";
             djPasswordInput.focus();
         }
     }
 
     function openLoginModal() {
-        djLoginModal.classList.add("active");
-        loginErrorMsg.style.display = "none";
-        djPasswordInput.value = "";
-        setTimeout(() => djPasswordInput.focus(), 100);
+        if (djLoginModal) djLoginModal.classList.add("active");
+        if (loginErrorMsg) loginErrorMsg.style.display = "none";
+        if (djPasswordInput) {
+            djPasswordInput.value = "";
+            setTimeout(() => djPasswordInput.focus(), 100);
+        }
     }
 
     function closeLoginModal() {
-        djLoginModal.classList.remove("active");
+        if (djLoginModal) djLoginModal.classList.remove("active");
     }
 
     // Event Listeners for DJ Login
-    djLoginToggleBtn.addEventListener("click", () => {
-        if (isDJ) {
-            if (confirm("DJ yetkilerini kapatmak ve dinleyici moduna geçmek istiyor musunuz?")) {
-                setDJMode(false);
+    if (djLoginToggleBtn) {
+        djLoginToggleBtn.addEventListener("click", () => {
+            if (isDJ) {
+                if (confirm("DJ yetkilerini kapatmak ve dinleyici moduna geçmek istiyor musunuz?")) {
+                    setDJMode(false);
+                }
+            } else {
+                openLoginModal();
             }
-        } else {
-            openLoginModal();
-        }
-    });
+        });
+    }
 
-    modalCloseBtn.addEventListener("click", closeLoginModal);
-    cancelLoginBtn.addEventListener("click", closeLoginModal);
+    if (modalCloseBtn) modalCloseBtn.addEventListener("click", closeLoginModal);
+    if (cancelLoginBtn) cancelLoginBtn.addEventListener("click", closeLoginModal);
     
-    submitLoginBtn.addEventListener("click", handleLogin);
-    djPasswordInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-            handleLogin();
-        }
-    });
+    if (submitLoginBtn && djPasswordInput) {
+        submitLoginBtn.addEventListener("click", handleLogin);
+        djPasswordInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                handleLogin();
+            }
+        });
+    }
 
     // Close modal when clicking outside content area
-    djLoginModal.addEventListener("click", (e) => {
-        if (e.target === djLoginModal) {
-            closeLoginModal();
-        }
-    });
+    if (djLoginModal) {
+        djLoginModal.addEventListener("click", (e) => {
+            if (e.target === djLoginModal) {
+                closeLoginModal();
+            }
+        });
+    }
 
     // -------------------------------------------------------------
     // 10. INITIALIZATION
