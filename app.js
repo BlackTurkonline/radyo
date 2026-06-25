@@ -1135,17 +1135,47 @@ document.addEventListener("DOMContentLoaded", () => {
     // -------------------------------------------------------------
     // 9.8 DYNAMIC CHAT ROOM LOGIC
     // -------------------------------------------------------------
-    const DEFAULT_CHAT_URL = "https://minnit.chat/blackfmchat?embed&nickname=";
-    
     function loadChatRoom() {
-        let chatUrl = localStorage.getItem("blackfm_chat_url") || DEFAULT_CHAT_URL;
+        let chatUrl = localStorage.getItem("blackfm_chat_url");
         
-        // Render iframe
-        chatContainer.innerHTML = `<iframe src="${chatUrl}" allowtransparency="true" allow="autoplay" frameborder="0"></iframe>`;
+        if (!chatUrl) {
+            // Render a beautiful cyberpunk setup guide card
+            chatContainer.innerHTML = `
+                <div class="chat-setup-guide">
+                    <i data-lucide="message-square-dashed" class="guide-icon"></i>
+                    <h4>Sohbet Ekranı Hazır!</h4>
+                    <p>Dinleyicilerinizin anlık yazışabilmesi için ücretsiz bir Cbox veya Minnit sohbet odası oluşturup linkini Ayarlar sekmesine yapıştırın.</p>
+                    <div class="guide-steps">
+                        <div class="step"><span class="step-num">1</span> <span><a href="https://www.cbox.ws/" target="_blank">Cbox.ws</a> veya <a href="https://minnit.chat/" target="_blank">Minnit.chat</a> sitesine gidip ücretsiz üye olun.</span></div>
+                        <div class="step"><span class="step-num">2</span> <span>Sohbet kutunuzu oluşturun ve size verilen <strong>iframe</strong> veya <strong>embed URL</strong> linkini kopyalayın.</span></div>
+                        <div class="step"><span class="step-num">3</span> <span>DJ Girişi yapın (Şifre: <code>blackfm123</code>), Ayarlar sekmesindeki Sohbet Odası alanına linki yapıştırıp kaydedin!</span></div>
+                    </div>
+                    <button id="guide-dj-login-btn" class="action-btn"><i data-lucide="lock"></i> DJ Girişi Yap</button>
+                </div>
+            `;
+            
+            // Add event listener to the login button inside the guide
+            const guideBtn = document.getElementById("guide-dj-login-btn");
+            if (guideBtn) {
+                guideBtn.addEventListener("click", () => {
+                    openLoginModal();
+                });
+            }
+            lucide.createIcons();
+        } else {
+            // Clean/ensure the URL is iframe-friendly (e.g. if copy-pasted full iframe tag, extract the src)
+            let srcUrl = chatUrl;
+            const srcMatch = chatUrl.match(/src=["'](.*?)["']/);
+            if (srcMatch && srcMatch[1]) {
+                srcUrl = srcMatch[1];
+            }
+            
+            // Render iframe
+            chatContainer.innerHTML = `<iframe src="${srcUrl}" allowtransparency="true" allow="autoplay" frameborder="0"></iframe>`;
+        }
         
-        // Set input value
         if (settingsChatUrl) {
-            settingsChatUrl.value = chatUrl;
+            settingsChatUrl.value = chatUrl || "";
         }
     }
 
