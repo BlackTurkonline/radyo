@@ -103,7 +103,7 @@ body {
 /* App Wrapper */
 .app-container {
     width: 100%;
-    max-width: 1300px;
+    max-width: 1100px;
     margin: 20px;
     display: flex;
     flex-direction: column;
@@ -216,33 +216,9 @@ body {
 /* Grid Layout */
 .app-grid {
     display: grid;
-    grid-template-columns: 1fr 1.1fr 1.2fr;
+    grid-template-columns: 1.1fr 1.2fr;
     gap: 20px;
     min-height: 580px;
-}
-
-/* LEFT: CHAT PANEL */
-.chat-panel {
-    display: flex;
-    flex-direction: column;
-}
-
-.chat-frame-container {
-    flex-grow: 1;
-    width: 100%;
-    height: 100%;
-    min-height: 440px;
-    border-radius: 16px;
-    overflow: hidden;
-    border: 1px solid var(--border-glass);
-    background: rgba(0, 0, 0, 0.2);
-}
-
-.chat-frame-container iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    background: transparent;
 }
 
 .panel {
@@ -1291,14 +1267,14 @@ body.is-guest .footer-links {
     display: none !important;
 }
 
-/* Hide Control Panel completely in Guest Mode and adjust to 2 columns */
+/* Hide Control Panel completely in Guest Mode and center Player */
 body.is-guest .control-panel {
     display: none !important;
 }
 
 body.is-guest .app-grid {
-    grid-template-columns: 1fr 1.1fr;
-    max-width: 960px;
+    grid-template-columns: 1fr;
+    max-width: 500px;
     margin: 0 auto;
     width: 100%;
 }
@@ -1325,20 +1301,6 @@ body.is-guest .scrollable-list {
     .app-grid {
         grid-template-columns: 1fr !important;
         gap: 16px;
-    }
-    
-    /* Order items on mobile so Player is first, then Chat, then DJ Panel */
-    .player-panel {
-        order: 1;
-    }
-    
-    .chat-panel {
-        order: 2;
-        min-height: 450px;
-    }
-    
-    .control-panel {
-        order: 3;
     }
     
     .panel {
@@ -1380,87 +1342,5 @@ body.is-guest .scrollable-list {
     .footer-links .divider {
         display: none;
     }
-}
-
-/* Chat Setup Guide Panel */
-.chat-setup-guide {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    padding: 30px 20px;
-    text-align: center;
-    color: var(--text-muted);
-    gap: 15px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 16px;
-    border: 1px solid var(--border-glass);
-}
-
-.guide-icon {
-    width: 48px;
-    height: 48px;
-    color: var(--neon-pink);
-    filter: drop-shadow(0 0 8px var(--neon-pink));
-}
-
-.chat-setup-guide h4 {
-    font-family: var(--font-heading);
-    font-size: 1.1rem;
-    color: #ffffff;
-    font-weight: 600;
-    margin: 0;
-}
-
-.chat-setup-guide p {
-    font-size: 0.8rem;
-    line-height: 1.4;
-    margin: 0;
-}
-
-.guide-steps {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    text-align: left;
-    width: 100%;
-    margin: 10px 0;
-}
-
-.step {
-    font-size: 0.75rem;
-    line-height: 1.4;
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-}
-
-.step-num {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: rgba(0, 255, 204, 0.1);
-    border: 1px solid var(--neon-green);
-    color: var(--neon-green);
-    font-size: 0.65rem;
-    font-weight: bold;
-    flex-shrink: 0;
-    margin-top: 1px;
-}
-
-.step a {
-    color: var(--neon-green);
-    text-decoration: underline;
-}
-
-.step code {
-    background: rgba(255, 255, 255, 0.04);
-    padding: 2px 4px;
-    border-radius: 4px;
-    color: var(--text-main);
 }
 
