@@ -87,6 +87,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const resetPlaylistBtn = document.getElementById("reset-playlist-btn");
     const testJingleBtn = document.getElementById("test-jingle-btn");
     
+    // Chat Elements
+    const chatContainer = document.getElementById("chat-container");
+    const settingsChatUrl = document.getElementById("settings-chat-url");
+    const saveChatUrlBtn = document.getElementById("save-chat-url-btn");
+    
     // DJ Elements
     const djLoginToggleBtn = document.getElementById("dj-login-toggle-btn");
     const djLoginModal = document.getElementById("dj-login-modal");
@@ -1128,8 +1133,37 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // -------------------------------------------------------------
+    // 9.8 DYNAMIC CHAT ROOM LOGIC
+    // -------------------------------------------------------------
+    const DEFAULT_CHAT_URL = "https://minnit.chat/blackfmchat?embed&nickname=";
+    
+    function loadChatRoom() {
+        let chatUrl = localStorage.getItem("blackfm_chat_url") || DEFAULT_CHAT_URL;
+        
+        // Render iframe
+        chatContainer.innerHTML = `<iframe src="${chatUrl}" allowtransparency="true" allow="autoplay" frameborder="0"></iframe>`;
+        
+        // Set input value
+        if (settingsChatUrl) {
+            settingsChatUrl.value = chatUrl;
+        }
+    }
+
+    if (saveChatUrlBtn) {
+        saveChatUrlBtn.addEventListener("click", () => {
+            const newUrl = settingsChatUrl.value.trim();
+            if (newUrl) {
+                localStorage.setItem("blackfm_chat_url", newUrl);
+                loadChatRoom();
+                alert("Sohbet odası bağlantısı başarıyla güncellendi!");
+            }
+        });
+    }
+
+    // -------------------------------------------------------------
     // 10. INITIALIZATION
     // -------------------------------------------------------------
+    loadChatRoom();
     const wasDJ = sessionStorage.getItem("blackfm_is_dj") === "true";
     setDJMode(wasDJ);
     setVolume(volume);
