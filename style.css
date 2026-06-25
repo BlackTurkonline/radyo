@@ -247,6 +247,7 @@ body.is-guest .control-panel {
 .player-panel {
     align-items: center;
     justify-content: center;
+    overflow: visible !important; /* Allow search dropdown to overlay outside panel if needed */
 }
 
 .deck-container {
@@ -1819,7 +1820,7 @@ body.is-guest .control-panel {
 /* Search Dropdown Results */
 .search-results-container {
     position: absolute;
-    top: calc(100% + 5px);
+    bottom: calc(100% + 8px); /* Open upwards so it's fully visible and fits the screen nicely */
     left: 0;
     width: 100%;
     background: rgba(15, 15, 22, 0.95);
