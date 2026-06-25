@@ -108,6 +108,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const canvas = document.getElementById("visualizer");
     const canvasCtx = canvas ? canvas.getContext("2d") : null;
 
+    // Audio Visualizer Bars
+    const visualizerBarsContainer = document.getElementById("visualizer-bars");
+    const numVisualizerBars = 16;
+    let visualizerLoopId = null;
+
+    if (visualizerBarsContainer) {
+        visualizerBarsContainer.innerHTML = ""; // Clear placeholders
+        for (let i = 0; i < numVisualizerBars; i++) {
+            const bar = document.createElement("div");
+            bar.className = "bar";
+            visualizerBarsContainer.appendChild(bar);
+        }
+        // Initialize in paused state
+        visualizerBarsContainer.classList.add("paused");
+    }
+
     // Initialize Lucide Icons
     lucide.createIcons();
 
@@ -382,6 +398,13 @@ document.addEventListener("DOMContentLoaded", () => {
         if (visualizerAnimationId) {
             cancelAnimationFrame(visualizerAnimationId);
         }
+        
+        if (visualizerBarsContainer) {
+            visualizerBarsContainer.classList.add("paused");
+            visualizerBarsContainer.classList.remove("simulated");
+            const bars = visualizerBarsContainer.querySelectorAll(".bar");
+            bars.forEach(b => b.style.height = "4px");
+        }
     }
 
     function togglePlay() {
@@ -494,14 +517,67 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // -------------------------------------------------------------
-    // 5. AUDIO VISUALIZER (RADIAL GLOW WAVE)
+    // 5. AUDIO VISUALIZER (NEON EQUALIZER BARS)
     // -------------------------------------------------------------
-    function resizeCanvas() {
-        // Visualizer disabled to prevent lag
-    }
-    
     function startVisualizer() {
-        // Visualizer disabled to prevent lag
+        if (visualizerAnimationId) {
+            cancelAnimationFrame(visualizerAnimationId);
+        }
+        updateVisualizer();
+    }
+
+    function updateVisualizer() {
+        if (!isPlaying) {
+            if (visualizerBarsContainer) {
+                visualizerBarsContainer.classList.add("paused");
+                visualizerBarsContainer.classList.remove("simulated");
+                const bars = visualizerBarsContainer.querySelectorAll(".bar");
+                bars.forEach(b => b.style.height = "4px");
+            }
+            return;
+        }
+
+        if (visualizerBarsContainer) {
+            visualizerBarsContainer.classList.remove("paused");
+        }
+
+        // If Web Audio API is active and we have data
+        if (audioCtx && analyser && !isUsingSimulatedVisualizer) {
+            if (visualizerBarsContainer) {
+                visualizerBarsContainer.classList.remove("simulated");
+            }
+
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            analyser.getByteFrequencyData(dataArray);
+
+            const bars = visualizerBarsContainer.querySelectorAll(".bar");
+            const step = Math.floor(bufferLength / numVisualizerBars) || 1;
+
+            let isSilent = true;
+            bars.forEach((bar, i) => {
+                const dataIndex = Math.min(i * step, bufferLength - 1);
+                const value = dataArray[dataIndex];
+                if (value > 0) isSilent = false;
+
+                // Map value (0-255) to height (4-38px)
+                const height = 4 + (value / 255) * 34;
+                bar.style.height = `${height}px`;
+            });
+
+            if (isSilent) {
+                if (visualizerBarsContainer) {
+                    visualizerBarsContainer.classList.add("simulated");
+                }
+            }
+        } else {
+            // Fallback to simulated CSS wave
+            if (visualizerBarsContainer) {
+                visualizerBarsContainer.classList.add("simulated");
+            }
+        }
+
+        visualizerAnimationId = requestAnimationFrame(updateVisualizer);
     }
 
     // -------------------------------------------------------------
