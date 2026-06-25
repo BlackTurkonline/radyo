@@ -1267,6 +1267,18 @@ body.is-guest .footer-links {
     display: none !important;
 }
 
+/* Hide Control Panel completely in Guest Mode and center Player */
+body.is-guest .control-panel {
+    display: none !important;
+}
+
+body.is-guest .app-grid {
+    grid-template-columns: 1fr;
+    max-width: 500px;
+    margin: 0 auto;
+    width: 100%;
+}
+
 /* Adjust layout for Guest Mode */
 body.is-guest .progress-bar-wrapper {
     pointer-events: none;
@@ -1282,19 +1294,52 @@ body.is-guest .scrollable-list {
 
 /* Responsive Layout */
 @media (max-width: 900px) {
+    .app-container {
+        margin: 10px;
+    }
+
     .app-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
+        gap: 16px;
+    }
+    
+    .panel {
+        padding: 20px;
+        border-radius: 20px;
+    }
+
+    .vinyl-wrapper {
+        width: 160px;
+        height: 160px;
+        margin-bottom: 15px;
     }
     
     .app-header {
         flex-direction: column;
-        gap: 12px;
+        gap: 15px;
         text-align: center;
+        padding: 15px;
+    }
+
+    .header-controls {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
     }
     
     .app-footer {
         flex-direction: column;
         gap: 10px;
         text-align: center;
+        padding: 15px;
+    }
+
+    .footer-links {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .footer-links .divider {
+        display: none;
     }
 }
