@@ -6,12 +6,20 @@ document.addEventListener("DOMContentLoaded", () => {
     // -------------------------------------------------------------
     // 1. STATE & VARIABLES
     // -------------------------------------------------------------
-    let songs = [...DEFAULT_PLAYLIST.songs];
     let jingles = [...DEFAULT_PLAYLIST.jingles];
     
     // User added URL streams (load from localStorage if exists)
     let customTracks = JSON.parse(localStorage.getItem("blackfm_custom_tracks")) || [];
-    songs = [...songs, ...customTracks];
+    
+    // Master song list containing all items
+    let allSongs = [...DEFAULT_PLAYLIST.songs, ...customTracks];
+    let songs = [...allSongs]; // currently active playing pool
+    
+    // Playlists & Liking State
+    let likedSongs = new Set(JSON.parse(localStorage.getItem("blackfm_liked_songs")) || []);
+    let playCounts = JSON.parse(localStorage.getItem("blackfm_play_counts")) || {};
+    let activePlaylist = "all"; // "all" | "favorites" | "most-played"
+    let playCountIncremented = false;
 
     let currentTrack = null;
     let isPlaying = false;
@@ -85,7 +93,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const customStreamUrl = document.getElementById("custom-stream-url");
     const addUrlBtn = document.getElementById("add-url-btn");
     const resetPlaylistBtn = document.getElementById("reset-playlist-btn");
-    const testJingleBtn = document.getElementById("test-jingle-btn");
     
 
     // DJ Elements
@@ -166,6 +173,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Create playing queue item
     function setTrack(track, type = "music") {
         currentTrack = { track, type };
+        playCountIncremented = false;
+        updateLikeButtonUI();
         
         // Update UI
         nowPlayingTitle.textContent = track.title;
@@ -550,6 +559,22 @@ document.addEventListener("DOMContentLoaded", () => {
         currentTimeText.textContent = formatTime(audio.currentTime);
         totalTimeText.textContent = formatTime(audio.duration);
 
+        // Play count increment logic (more than 5 seconds played)
+        if (isPlaying && !playCountIncremented && currentTrack && currentTrack.type === "music" && audio.currentTime > 5) {
+            const src = currentTrack.track.src;
+            playCounts[src] = (playCounts[src] || 0) + 1;
+            localStorage.setItem("blackfm_play_counts", JSON.stringify(playCounts));
+            playCountIncremented = true;
+            console.log(`Play count incremented for ${currentTrack.track.title}: ${playCounts[src]}`);
+            
+            if (activePlaylist === 'most-played') {
+                updateSongsQueue();
+            }
+            if (isDJ) {
+                renderSongsList();
+            }
+        }
+
         // Auto transition trigger for crossfade
         if (isPlaying && (audio.duration - audio.currentTime <= crossfadeDuration) && crossfadeDuration > 0) {
             // Unbind timeupdate temporarily to prevent double skip
@@ -616,6 +641,124 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    // Playlist selector logic
+    const pillButtons = document.querySelectorAll(".pill-btn");
+    pillButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const playlistType = btn.getAttribute("data-playlist");
+            
+            // Check if empty
+            if (playlistType === "favorites" && likedSongs.size === 0) {
+                alert("Henüz beğendiğiniz bir şarkı yok! Şarkıları çalarken kalp simgesine tıklayarak favorilerinize ekleyebilirsiniz.");
+                return;
+            }
+            if (playlistType === "most-played") {
+                const playedSongsCount = Object.keys(playCounts).length;
+                if (playedSongsCount === 0) {
+                    alert("Henüz yeterli dinleme verisi yok! Şarkıları dinledikçe en çok dinlenenler listesi otomatik oluşacaktır.");
+                    return;
+                }
+            }
+            
+            pillButtons.forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            
+            activePlaylist = playlistType;
+            updateSongsQueue();
+            
+            // Play a track from new playlist
+            if (songs.length > 0) {
+                let startTrack = songs[0];
+                if (isShuffle) {
+                    startTrack = songs[Math.floor(Math.random() * songs.length)];
+                }
+                setTrack(startTrack, "music");
+                playAudio();
+            } else {
+                currentTrack = null;
+                pauseAudio();
+                nowPlayingTitle.textContent = "Şarkı Seçilmedi";
+                nowPlayingArtist.textContent = "Çalma listesi boş";
+            }
+            
+            if (isDJ) {
+                renderSongsList();
+            }
+        });
+    });
+
+    // Helper functions for Playlists & Favorites
+    function updateSongsQueue() {
+        if (activePlaylist === "all") {
+            songs = [...allSongs];
+        } else if (activePlaylist === "favorites") {
+            songs = allSongs.filter(s => likedSongs.has(s.src));
+        } else if (activePlaylist === "most-played") {
+            const playedSongs = allSongs.filter(s => (playCounts[s.src] || 0) > 0);
+            songs = playedSongs.sort((a, b) => (playCounts[b.src] || 0) - (playCounts[a.src] || 0));
+        }
+    }
+
+    const likeBtn = document.getElementById("like-btn");
+    const likeIcon = document.getElementById("like-icon");
+
+    function updateLikeButtonUI() {
+        if (!likeBtn || !currentTrack) return;
+        
+        if (currentTrack.type === "jingle") {
+            likeBtn.style.display = "none";
+            return;
+        }
+        
+        likeBtn.style.display = "inline-flex";
+        if (likedSongs.has(currentTrack.track.src)) {
+            likeBtn.classList.add("liked");
+            likeIcon.setAttribute("data-lucide", "heart");
+        } else {
+            likeBtn.classList.remove("liked");
+            likeIcon.setAttribute("data-lucide", "heart");
+        }
+        lucide.createIcons();
+    }
+
+    function toggleLike() {
+        if (!currentTrack || currentTrack.type === "jingle") return;
+        
+        const src = currentTrack.track.src;
+        if (likedSongs.has(src)) {
+            likedSongs.delete(src);
+            // If the favorites playlist is now empty, switch back to 'all'
+            if (activePlaylist === 'favorites' && likedSongs.size === 0) {
+                activePlaylist = 'all';
+                const allPill = document.querySelector('.pill-btn[data-playlist="all"]');
+                if (allPill) {
+                    pillButtons.forEach(b => b.classList.remove("active"));
+                    allPill.classList.add("active");
+                }
+                updateSongsQueue();
+                alert("Favori listeniz boşaldığı için Radyo Akışı'na geri dönüldü.");
+            }
+        } else {
+            likedSongs.add(src);
+        }
+        
+        localStorage.setItem("blackfm_liked_songs", JSON.stringify(Array.from(likedSongs)));
+        updateLikeButtonUI();
+        
+        if (activePlaylist === "favorites") {
+            updateSongsQueue();
+            prepareNextTrack();
+        }
+        
+        if (isDJ) {
+            renderSongsList();
+        }
+    }
+
+    if (likeBtn) {
+        likeBtn.addEventListener("click", toggleLike);
+    }
+
     // -------------------------------------------------------------
     // 7. PLAYLIST RENDERING & DYNAMIC LISTS
     // -------------------------------------------------------------
@@ -629,7 +772,14 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderSongsList() {
         if (!songsList) return;
         songsList.innerHTML = "";
-        if (songsCountBadge) songsCountBadge.textContent = `${songs.length} Şarkı`;
+        
+        let countText = `${songs.length} Şarkı`;
+        if (activePlaylist === "favorites") {
+            countText = `${songs.length} Beğenilen Şarkı`;
+        } else if (activePlaylist === "most-played") {
+            countText = `${songs.length} En Çok Dinlenen`;
+        }
+        if (songsCountBadge) songsCountBadge.textContent = countText;
         
         if (songs.length === 0) {
             songsList.innerHTML = `<div class="empty-list-msg">Çalma listesi boş. Şarkı ekleyin!</div>`;
@@ -641,13 +791,21 @@ document.addEventListener("DOMContentLoaded", () => {
             card.className = "track-card";
             card.setAttribute("data-src", song.src);
             
+            const isLiked = likedSongs.has(song.src);
+            const playCount = playCounts[song.src] || 0;
+            const playCountText = playCount > 0 ? `<span class="card-play-count"><i data-lucide="play" style="width: 10px; height: 10px; display: inline-flex;"></i> ${playCount}</span>` : "";
+            const heartText = isLiked ? `<span class="card-heart-icon"><i data-lucide="heart" style="fill: var(--neon-pink); color: var(--neon-pink); width: 10px; height: 10px; display: inline-flex;"></i></span>` : "";
+
             card.innerHTML = `
                 <div class="card-play-icon">
                     <i data-lucide="play"></i>
                 </div>
                 <div class="card-meta">
-                    <h4>${song.title}</h4>
-                    <p>${song.artist || "Bilinmeyen Sanatçı"}</p>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <h4>${song.title}</h4>
+                        ${heartText}
+                    </div>
+                    <p>${song.artist || "Bilinmeyen Sanatçı"}${playCountText}</p>
                 </div>
                 <span class="card-duration">${song.duration || "--:--"}</span>
                 <button class="delete-track-btn" title="Sil" data-index="${index}">
@@ -784,7 +942,8 @@ document.addEventListener("DOMContentLoaded", () => {
         songUploadZone.addEventListener("click", () => songFileInput.click());
         songFileInput.addEventListener("change", (e) => {
             processAudioFiles(e.target.files, (newSong) => {
-                songs.push(newSong);
+                allSongs.push(newSong);
+                updateSongsQueue();
                 renderSongsList();
                 prepareNextTrack();
             });
@@ -826,7 +985,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (songUploadZone && songFileInput) {
         setupDragAndDrop(songUploadZone, songFileInput, (newSong) => {
-            songs.push(newSong);
+            allSongs.push(newSong);
+            updateSongsQueue();
             renderSongsList();
             prepareNextTrack();
         });
@@ -842,7 +1002,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Deleting tracks
     function deleteSong(index) {
         const deleted = songs[index];
-        songs.splice(index, 1);
+        allSongs = allSongs.filter(s => s.src !== deleted.src);
         
         // If playing song is deleted, skip to next
         if (currentTrack && currentTrack.type === "music" && currentTrack.track.src === deleted.src) {
@@ -855,6 +1015,17 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.setItem("blackfm_custom_tracks", JSON.stringify(customTracks));
         }
 
+        if (likedSongs.has(deleted.src)) {
+            likedSongs.delete(deleted.src);
+            localStorage.setItem("blackfm_liked_songs", JSON.stringify(Array.from(likedSongs)));
+        }
+        
+        if (playCounts[deleted.src]) {
+            delete playCounts[deleted.src];
+            localStorage.setItem("blackfm_play_counts", JSON.stringify(playCounts));
+        }
+
+        updateSongsQueue();
         renderSongsList();
         prepareNextTrack();
     }
@@ -912,12 +1083,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 duration: "CANLI"
             };
 
-            songs.push(newTrack);
+            allSongs.push(newTrack);
             customTracks.push(newTrack);
             
             // Save URL list persistently
             localStorage.setItem("blackfm_custom_tracks", JSON.stringify(customTracks));
 
+            updateSongsQueue();
             // Render lists & notify
             renderSongsList();
             customStreamUrl.value = "";
@@ -949,8 +1121,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 localStorage.removeItem("blackfm_custom_tracks");
                 customTracks = [];
                 
-                songs = [...DEFAULT_PLAYLIST.songs];
-                jingles = [...DEFAULT_PLAYLIST.jingles];
+                allSongs = [...DEFAULT_PLAYLIST.songs];
+                updateSongsQueue();
                 
                 songsPlayedCount = 0;
                 currentTrack = null;
@@ -963,20 +1135,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Test Jingle trigger in footer
-    if (testJingleBtn) {
-        testJingleBtn.addEventListener("click", (e) => {
-            e.preventDefault();
-            if (jingles.length === 0) {
-                alert("Listede hiç jingle yok! Önce jingle sekmesinden ses yükleyin.");
-                return;
-            }
-            
-            // Trigger a random jingle immediately!
-            const randomJingle = jingles[Math.floor(Math.random() * jingles.length)];
-            transitionToTrack(randomJingle, "jingle");
-        });
-    }
 
     // -------------------------------------------------------------
     // 9.5 DJ AUTHENTICATION & UI CONTROL
