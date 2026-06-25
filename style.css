@@ -1308,53 +1308,232 @@ body.is-guest .control-panel {
 }
 
 /* Responsive Layout */
-@media (max-width: 900px) {
+@media (max-width: 768px) {
     .app-container {
         margin: 10px;
+        max-width: 100% !important;
     }
 
     .app-grid {
+        display: flex !important;
+        flex-direction: column !important;
         gap: 16px;
     }
     
     .panel {
+        padding: 18px;
+        border-radius: 20px;
+    }
+
+    /* Compact Header on Mobile */
+    .app-header {
+        padding: 12px 14px;
+        margin-bottom: 12px;
+        flex-direction: row !important;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .brand {
+        gap: 10px;
+    }
+
+    .brand-logo {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+    }
+
+    .brand-logo i {
+        width: 18px;
+        height: 18px;
+    }
+
+    .brand-text h1 {
+        font-size: 1.1rem;
+        letter-spacing: 1px;
+    }
+
+    .brand-text .subtitle {
+        font-size: 0.55rem;
+        letter-spacing: 1.5px;
+    }
+
+    .header-controls {
+        gap: 8px;
+        width: auto !important;
+        justify-content: flex-end !important;
+    }
+
+    .dj-indicator-btn {
+        padding: 6px 10px;
+        font-size: 0.65rem;
+        border-radius: 14px;
+    }
+
+    .status-indicator {
+        padding: 5px 8px;
+        font-size: 0.65rem;
+        border-radius: 14px;
+    }
+
+    /* Player Adjustments */
+    .vinyl-wrapper {
+        width: 130px;
+        height: 130px;
+        margin-bottom: 15px;
+    }
+
+    .vinyl-label {
+        width: 50px;
+        height: 50px;
+    }
+
+    .label-brand {
+        font-size: 0.4rem;
+    }
+
+    .label-freq {
+        font-size: 0.35rem;
+    }
+
+    .track-info h2 {
+        font-size: 1.2rem;
+    }
+
+    .track-info h3 {
+        font-size: 0.8rem;
+    }
+
+    .progress-container {
+        margin-bottom: 15px;
+        gap: 8px;
+    }
+
+    .player-controls {
+        gap: 16px;
+        margin-bottom: 15px;
+    }
+
+    .ctrl-btn {
+        width: 38px;
+        height: 38px;
+    }
+
+    .ctrl-btn.play-btn {
+        width: 56px;
+        height: 56px;
+    }
+
+    .ctrl-btn.play-btn i {
+        width: 24px;
+        height: 24px;
+    }
+
+    .extra-controls {
+        padding-top: 15px;
+    }
+
+    .volume-slider-wrapper {
+        width: 60px;
+    }
+
+    .toggle-buttons {
+        gap: 10px;
+    }
+
+    .next-track-container {
+        margin-top: 15px;
+        padding: 8px 12px;
+        border-radius: 10px;
+        font-size: 0.7rem;
+    }
+
+    /* DJ Control Panel Mobile view */
+    .panel-tabs {
+        gap: 5px;
+        margin-bottom: 15px;
+    }
+
+    .tab-btn {
+        font-size: 0.8rem;
+        padding: 8px 10px;
+    }
+
+    .upload-zone {
+        padding: 15px;
+        border-radius: 12px;
+        margin-bottom: 15px;
+    }
+
+    .upload-icon {
+        width: 24px;
+        height: 24px;
+        margin-bottom: 6px;
+    }
+
+    .upload-zone p {
+        font-size: 0.75rem;
+    }
+
+    .track-card {
+        padding: 8px 12px;
+        border-radius: 10px;
+    }
+
+    .card-play-icon {
+        width: 26px;
+        height: 26px;
+        margin-right: 10px;
+    }
+
+    .card-meta h4 {
+        font-size: 0.75rem;
+    }
+
+    .card-meta p {
+        font-size: 0.65rem;
+    }
+
+    .settings-form {
+        gap: 15px;
+    }
+
+    .setting-group select,
+    .setting-group input[type="text"] {
+        padding: 8px 12px;
+        font-size: 0.75rem;
+        border-radius: 8px;
+    }
+
+    .action-btn, .danger-btn {
+        padding: 8px 16px;
+        font-size: 0.75rem;
+        border-radius: 8px;
+    }
+
+    .modal-content {
         padding: 20px;
         border-radius: 20px;
     }
 
-    .vinyl-wrapper {
-        width: 160px;
-        height: 160px;
-        margin-bottom: 15px;
-    }
-    
-    .app-header {
-        flex-direction: column;
-        gap: 15px;
-        text-align: center;
-        padding: 15px;
-    }
-
-    .header-controls {
-        width: 100%;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-    
+    /* Footer Mobile view */
     .app-footer {
         flex-direction: column;
         gap: 10px;
         text-align: center;
-        padding: 15px;
+        padding: 12px;
+        margin-top: 12px;
     }
 
     .footer-links {
-        flex-direction: column;
-        gap: 8px;
+        flex-direction: row;
+        gap: 12px;
     }
 
     .footer-links .divider {
-        display: none;
+        display: inline;
     }
 }
 
