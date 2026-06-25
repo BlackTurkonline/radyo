@@ -1339,4 +1339,94 @@ document.addEventListener("DOMContentLoaded", () => {
         const startTrack = isShuffle ? songs[Math.floor(Math.random() * songs.length)] : songs[0];
         setTrack(startTrack, "music");
     }
+
+    // -------------------------------------------------------------
+    // 11. SONG SEARCH IMPLEMENTATION
+    // -------------------------------------------------------------
+    const searchInput = document.getElementById("song-search-input");
+    const searchClearBtn = document.getElementById("search-clear-btn");
+    const searchResultsContainer = document.getElementById("search-results");
+
+    if (searchInput && searchResultsContainer) {
+        searchInput.addEventListener("input", (e) => {
+            const query = e.target.value.trim().toLowerCase();
+            
+            if (searchClearBtn) {
+                searchClearBtn.style.display = query.length > 0 ? "block" : "none";
+            }
+            
+            if (query.length <= 1) {
+                searchResultsContainer.style.display = "none";
+                searchResultsContainer.innerHTML = "";
+                return;
+            }
+            
+            // Filter matching songs from allSongs
+            const matches = allSongs.filter(song => {
+                const titleMatch = (song.title || "").toLowerCase().includes(query);
+                const artistMatch = (song.artist || "").toLowerCase().includes(query);
+                return titleMatch || artistMatch;
+            });
+            
+            searchResultsContainer.innerHTML = "";
+            
+            if (matches.length === 0) {
+                searchResultsContainer.innerHTML = `<div class="search-no-results">Sonuç bulunamadı</div>`;
+                searchResultsContainer.style.display = "flex";
+                return;
+            }
+            
+            // Show max 5 results for compact view
+            const limit = Math.min(matches.length, 5);
+            for (let i = 0; i < limit; i++) {
+                const song = matches[i];
+                const card = document.createElement("div");
+                card.className = "search-result-card";
+                
+                card.innerHTML = `
+                    <i data-lucide="music"></i>
+                    <div class="search-result-info">
+                        <span class="search-result-title">${song.title}</span>
+                        <span class="search-result-artist">${song.artist || "Bilinmeyen Sanatçı"}</span>
+                    </div>
+                    <span class="search-result-duration">${song.duration || "--:--"}</span>
+                `;
+                
+                card.addEventListener("click", () => {
+                    songsPlayedCount = 0; // Reset jingle counter on manual selection
+                    setTrack(song, "music");
+                    playAudio();
+                    
+                    // Clear search
+                    searchInput.value = "";
+                    if (searchClearBtn) searchClearBtn.style.display = "none";
+                    searchResultsContainer.style.display = "none";
+                    searchResultsContainer.innerHTML = "";
+                });
+                
+                searchResultsContainer.appendChild(card);
+            }
+            
+            lucide.createIcons();
+            searchResultsContainer.style.display = "flex";
+        });
+        
+        // Clear button handler
+        if (searchClearBtn) {
+            searchClearBtn.addEventListener("click", () => {
+                searchInput.value = "";
+                searchClearBtn.style.display = "none";
+                searchResultsContainer.style.display = "none";
+                searchResultsContainer.innerHTML = "";
+                searchInput.focus();
+            });
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener("click", (e) => {
+            if (!searchInput.contains(e.target) && !searchResultsContainer.contains(e.target)) {
+                searchResultsContainer.style.display = "none";
+            }
+        });
+    }
 });
