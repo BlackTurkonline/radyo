@@ -1710,6 +1710,11 @@ const DEFAULT_PLAYLIST = {
   // Şarkı aralarına girecek Jingle'lar
   jingles: [
     {
+      title: "Black FM Jingle 1",
+      artist: "BLACK FM",
+      src: "jingles/BlackFm-1.mp3"
+    },
+    {
       title: "Black FM Jingle 2",
       artist: "BLACK FM",
       src: "jingles/J2.mp3"
