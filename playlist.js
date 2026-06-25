@@ -1713,16 +1713,6 @@ const DEFAULT_PLAYLIST = {
       title: "Black FM Jingle 1",
       artist: "BLACK FM",
       src: "jingles/BlackFm-1.mp3"
-    },
-    {
-      title: "Black FM Retro Dial-Up ID",
-      artist: "System Sound",
-      src: "https://www.soundjay.com/communication/sounds/dial-up-modem-01.mp3"
-    },
-    {
-      title: "Black FM Radio Static Transition",
-      artist: "Radio Noise",
-      src: "https://www.soundjay.com/misc/sounds/radio-static-05.mp3"
     }
   ]
 };
