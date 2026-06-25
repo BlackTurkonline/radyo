@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // DJ Mode Variables
     let isDJ = false;
-    const DJ_PASSWORD_HASH = "dcc9f80a36945ab2216774aa09b39db42c53ad4e72037b9a62efe74c9b2915da"; // SHA-256 of blackfm123
+    const DJ_PASSWORD_HASH = "bfeeb56fda1d80f8ee0c1cee87a260947023f9ba208974fa32ba8ec832c6501c"; // SHA-256 of 581534
 
     // DOM Elements
     const audio = document.getElementById("audio-player");
