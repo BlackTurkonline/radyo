@@ -35,6 +35,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let isAnalyserSilent = true;
     let isUsingSimulatedVisualizer = false;
 
+    // DJ Mode Variables
+    let isDJ = false;
+    const DJ_PASSWORD_HASH = "dcc9f80a36945ab2216774aa09b39db42c53ad4e72037b9a62efe74c9b2915da"; // SHA-256 of blackfm123
+
     // DOM Elements
     const audio = document.getElementById("audio-player");
     const playBtn = document.getElementById("play-btn");
@@ -82,6 +86,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const addUrlBtn = document.getElementById("add-url-btn");
     const resetPlaylistBtn = document.getElementById("reset-playlist-btn");
     const testJingleBtn = document.getElementById("test-jingle-btn");
+    
+    // DJ Elements
+    const djLoginToggleBtn = document.getElementById("dj-login-toggle-btn");
+    const djLoginModal = document.getElementById("dj-login-modal");
+    const modalCloseBtn = document.getElementById("modal-close-btn");
+    const cancelLoginBtn = document.getElementById("cancel-login-btn");
+    const submitLoginBtn = document.getElementById("submit-login-btn");
+    const djPasswordInput = document.getElementById("dj-password-input");
+    const loginErrorMsg = document.getElementById("login-error-msg");
     
     // Canvas
     const canvas = document.getElementById("visualizer");
@@ -1022,8 +1035,103 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // -------------------------------------------------------------
+    // 9.5 DJ AUTHENTICATION & UI CONTROL
+    // -------------------------------------------------------------
+    
+    // Hash checker using Web Crypto API
+    async function hashSHA256(str) {
+        const utf8 = new TextEncoder().encode(str);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        return hashHex;
+    }
+
+    // Set DJ Mode UI
+    function setDJMode(active) {
+        isDJ = active;
+        if (active) {
+            document.body.classList.remove("is-guest");
+            document.body.classList.add("is-dj");
+            djLoginToggleBtn.classList.add("dj-active");
+            djLoginToggleBtn.innerHTML = '<i data-lucide="unlock"></i> <span id="dj-btn-text">DJ Çıkışı</span>';
+            djLoginToggleBtn.title = "DJ Yetkilerini Kapat";
+            sessionStorage.setItem("blackfm_is_dj", "true");
+        } else {
+            document.body.classList.remove("is-dj");
+            document.body.classList.add("is-guest");
+            djLoginToggleBtn.classList.remove("dj-active");
+            djLoginToggleBtn.innerHTML = '<i data-lucide="lock"></i> <span id="dj-btn-text">DJ Girişi</span>';
+            djLoginToggleBtn.title = "DJ Kontrol Paneli Girişi";
+            sessionStorage.removeItem("blackfm_is_dj");
+            
+            // Switch to Songs tab in case they were on Settings or Jingles (which are hidden for guests)
+            document.querySelector("[data-tab='tab-songs']").click();
+        }
+        lucide.createIcons();
+    }
+
+    // Login logic
+    async function handleLogin() {
+        const password = djPasswordInput.value;
+        const hash = await hashSHA256(password);
+        
+        if (hash === DJ_PASSWORD_HASH) {
+            setDJMode(true);
+            closeLoginModal();
+            loginErrorMsg.style.display = "none";
+            djPasswordInput.value = "";
+        } else {
+            loginErrorMsg.style.display = "block";
+            djPasswordInput.value = "";
+            djPasswordInput.focus();
+        }
+    }
+
+    function openLoginModal() {
+        djLoginModal.classList.add("active");
+        loginErrorMsg.style.display = "none";
+        djPasswordInput.value = "";
+        setTimeout(() => djPasswordInput.focus(), 100);
+    }
+
+    function closeLoginModal() {
+        djLoginModal.classList.remove("active");
+    }
+
+    // Event Listeners for DJ Login
+    djLoginToggleBtn.addEventListener("click", () => {
+        if (isDJ) {
+            if (confirm("DJ yetkilerini kapatmak ve dinleyici moduna geçmek istiyor musunuz?")) {
+                setDJMode(false);
+            }
+        } else {
+            openLoginModal();
+        }
+    });
+
+    modalCloseBtn.addEventListener("click", closeLoginModal);
+    cancelLoginBtn.addEventListener("click", closeLoginModal);
+    
+    submitLoginBtn.addEventListener("click", handleLogin);
+    djPasswordInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            handleLogin();
+        }
+    });
+
+    // Close modal when clicking outside content area
+    djLoginModal.addEventListener("click", (e) => {
+        if (e.target === djLoginModal) {
+            closeLoginModal();
+        }
+    });
+
+    // -------------------------------------------------------------
     // 10. INITIALIZATION
     // -------------------------------------------------------------
+    const wasDJ = sessionStorage.getItem("blackfm_is_dj") === "true";
+    setDJMode(wasDJ);
     setVolume(volume);
     renderSongsList();
     renderJinglesList();
