@@ -103,7 +103,7 @@ body {
 /* App Wrapper */
 .app-container {
     width: 100%;
-    max-width: 1100px;
+    max-width: 550px;
     margin: 20px;
     display: flex;
     flex-direction: column;
@@ -215,10 +215,9 @@ body {
 
 /* Grid Layout */
 .app-grid {
-    display: grid;
-    grid-template-columns: 1.1fr 1.2fr;
+    display: flex;
+    flex-direction: column;
     gap: 20px;
-    min-height: 580px;
 }
 
 .panel {
@@ -1255,43 +1254,6 @@ body {
     padding-top: 16px;
 }
 
-/* Guest Restrictions (Default) */
-body.is-guest .ctrl-btn:not(.play-btn),
-body.is-guest .toggle-buttons,
-body.is-guest .upload-zone,
-body.is-guest .delete-track-btn,
-body.is-guest .reset-group,
-body.is-guest .tab-btn[data-tab="tab-jingles"],
-body.is-guest .tab-btn[data-tab="tab-settings"],
-body.is-guest .footer-links {
-    display: none !important;
-}
-
-/* Hide Control Panel completely in Guest Mode and center Player */
-body.is-guest .control-panel {
-    display: none !important;
-}
-
-body.is-guest .app-grid {
-    grid-template-columns: 1fr;
-    max-width: 500px;
-    margin: 0 auto;
-    width: 100%;
-}
-
-/* Adjust layout for Guest Mode */
-body.is-guest .progress-bar-wrapper {
-    pointer-events: none;
-}
-
-body.is-guest .progress-handle {
-    display: none !important;
-}
-
-body.is-guest .scrollable-list {
-    max-height: 440px;
-}
-
 /* Responsive Layout */
 @media (max-width: 900px) {
     .app-container {
@@ -1299,7 +1261,6 @@ body.is-guest .scrollable-list {
     }
 
     .app-grid {
-        grid-template-columns: 1fr !important;
         gap: 16px;
     }
     
