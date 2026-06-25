@@ -108,6 +108,61 @@ document.addEventListener("DOMContentLoaded", () => {
     // 2. PLAYBACK & QUEUE MANAGEMENT
     // -------------------------------------------------------------
     
+    let nextSongIndex = null;
+
+    function prepareNextTrack() {
+        if (songs.length === 0) return;
+        
+        let currentIndex = -1;
+        if (currentTrack && currentTrack.type === "music") {
+            currentIndex = songs.findIndex(s => s.src === currentTrack.track.src);
+        } else if (history.length > 0) {
+            const lastSongSrc = history[history.length - 1];
+            currentIndex = songs.findIndex(s => s.src === lastSongSrc);
+        }
+
+        if (isShuffle) {
+            nextSongIndex = Math.floor(Math.random() * songs.length);
+            if (nextSongIndex === currentIndex && songs.length > 1) {
+                nextSongIndex = (nextSongIndex + 1) % songs.length;
+            }
+        } else {
+            nextSongIndex = (currentIndex + 1) % songs.length;
+        }
+
+        updateNextTrackUI();
+    }
+
+    function updateNextTrackUI() {
+        const nextTrackTitle = document.getElementById("next-track-title");
+        if (!nextTrackTitle) return;
+
+        if (songs.length === 0) {
+            nextTrackTitle.textContent = "Çalma listesi boş";
+            return;
+        }
+
+        // Check if the very next track will be a jingle
+        let isNextJingle = false;
+        if (jingleFrequency > 0 && jingles.length > 0) {
+            if (currentTrack && currentTrack.type === "music") {
+                if (songsPlayedCount >= jingleFrequency) {
+                    isNextJingle = true;
+                }
+            }
+        }
+
+        if (isNextJingle) {
+            nextTrackTitle.textContent = "BLACK FM JINGLE (Tanıtım)";
+        } else {
+            if (nextSongIndex === null || nextSongIndex >= songs.length) {
+                nextSongIndex = 0; // Fallback
+            }
+            const nextSong = songs[nextSongIndex];
+            nextTrackTitle.textContent = `${nextSong.title} - ${nextSong.artist}`;
+        }
+    }
+
     // Create playing queue item
     function setTrack(track, type = "music") {
         currentTrack = { track, type };
@@ -138,6 +193,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Update active highlight in lists
         updateActiveHighlight();
+
+        // Prepare next track info
+        if (type === "music") {
+            prepareNextTrack();
+        } else {
+            updateNextTrackUI();
+        }
     }
 
     // Smooth transition between tracks
@@ -205,39 +267,17 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        // Play next song
-        let nextIndex = 0;
-        
-        if (currentTrack && currentTrack.type === "music") {
-            const currentIndex = songs.findIndex(s => s.src === currentTrack.track.src);
-            
+        // Play next song (use pre-calculated index)
+        if (nextSongIndex === null || nextSongIndex >= songs.length) {
             if (isShuffle) {
-                nextIndex = Math.floor(Math.random() * songs.length);
-                // Try not to repeat same song immediately if possible
-                if (nextIndex === currentIndex && songs.length > 1) {
-                    nextIndex = (nextIndex + 1) % songs.length;
-                }
+                nextSongIndex = Math.floor(Math.random() * songs.length);
             } else {
-                nextIndex = (currentIndex + 1) % songs.length;
+                nextSongIndex = 0;
             }
-            songsPlayedCount++;
-        } else {
-            // If we just finished a jingle, resume with a song
-            if (currentTrack && currentTrack.type === "jingle") {
-                if (isShuffle) {
-                    nextIndex = Math.floor(Math.random() * songs.length);
-                } else if (history.length > 0) {
-                    const lastSongSrc = history[history.length - 1];
-                    const lastIndex = songs.findIndex(s => s.src === lastSongSrc);
-                    nextIndex = (lastIndex + 1) % songs.length;
-                } else {
-                    nextIndex = 0;
-                }
-            } else {
-                nextIndex = isShuffle ? Math.floor(Math.random() * songs.length) : 0;
-            }
-            songsPlayedCount++;
         }
+
+        const songToPlay = songs[nextSongIndex];
+        songsPlayedCount++;
 
         // Record song to history
         if (currentTrack && currentTrack.type === "music") {
@@ -245,7 +285,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (history.length > 20) history.shift();
         }
 
-        transitionToTrack(songs[nextIndex], "music");
+        transitionToTrack(songToPlay, "music");
     }
 
     // Play previous song
@@ -492,6 +532,7 @@ document.addEventListener("DOMContentLoaded", () => {
     shuffleBtn.addEventListener("click", () => {
         isShuffle = !isShuffle;
         shuffleBtn.classList.toggle("active", isShuffle);
+        prepareNextTrack();
     });
 
     liveModeBtn.addEventListener("click", toggleLiveMode);
@@ -745,6 +786,7 @@ document.addEventListener("DOMContentLoaded", () => {
             processAudioFiles(e.target.files, (newSong) => {
                 songs.push(newSong);
                 renderSongsList();
+                prepareNextTrack();
             });
         });
     }
@@ -786,6 +828,7 @@ document.addEventListener("DOMContentLoaded", () => {
         setupDragAndDrop(songUploadZone, songFileInput, (newSong) => {
             songs.push(newSong);
             renderSongsList();
+            prepareNextTrack();
         });
     }
 
@@ -813,6 +856,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         renderSongsList();
+        prepareNextTrack();
     }
 
     function deleteJingle(index) {
@@ -881,6 +925,8 @@ document.addEventListener("DOMContentLoaded", () => {
             // Scroll to tab and highlight
             const tabSongs = document.querySelector("[data-tab='tab-songs']");
             if (tabSongs) tabSongs.click();
+
+            prepareNextTrack();
         });
     }
 
@@ -912,6 +958,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 renderSongsList();
                 renderJinglesList();
+                prepareNextTrack();
             }
         });
     }
