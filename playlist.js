@@ -1709,10 +1709,14 @@ const DEFAULT_PLAYLIST = {
 
   // Şarkı aralarına girecek Jingle'lar
   jingles: [
-    {
-      title: "Black FM Jingle 1",
-      artist: "BLACK FM",
-      src: "jingles/BlackFm-1.mp3"
-    }
+    { title: "Jingle 1", artist: "BLACK FM", src: "jingles/1.mp3" },
+    { title: "Jingle 2", artist: "BLACK FM", src: "jingles/2.mp3" },
+    { title: "Jingle 3", artist: "BLACK FM", src: "jingles/3.mp3" },
+    { title: "Jingle 4", artist: "BLACK FM", src: "jingles/4.mp3" },
+    { title: "Jingle 5", artist: "BLACK FM", src: "jingles/5.mp3" },
+    { title: "Jingle 6", artist: "BLACK FM", src: "jingles/6.mp3" },
+    { title: "Jingle 7", artist: "BLACK FM", src: "jingles/7.mp3" },
+    { title: "Jingle 8", artist: "BLACK FM", src: "jingles/8.mp3" },
+    { title: "Black FM", artist: "BLACK FM", src: "jingles/BlackFm.mp3" }
   ]
 };
